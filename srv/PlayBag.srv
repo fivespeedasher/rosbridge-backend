@@ -1,0 +1,3 @@
+bool start   # true = start playback, false = stop playback
+---
+bool success # true if the requested operation succeeded

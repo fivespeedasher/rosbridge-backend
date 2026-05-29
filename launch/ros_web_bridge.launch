@@ -1,0 +1,47 @@
+<launch>
+  <!--
+    Launch file for ros_web_bridge package
+    Starts rosbridge_server WebSocket server, web_video_server, and the bag playback node
+  -->
+
+  <!-- Start rosbridge_server WebSocket server -->
+  <node name="rosbridge_websocket"
+        pkg="rosbridge_server"
+        type="rosbridge_websocket"
+        output="screen"
+        respawn="false">
+    <param name="port" value="9092"/>
+    <param name="address" value=""/>
+    <param name="ssl" value="false"/>
+    <param name="authenticate" value="false"/>
+
+    <!-- Optional: Uncomment to restrict topics if needed -->
+    <!--
+    <param name="topic_whitelist" value="['/camera/color/image_raw']"/>
+    <param name="service_whitelist" value="['/ros_web_bridge_node/play_bag']"/>
+    -->
+  </node>
+
+  <!-- Start web_video_server for MJPEG image streaming -->
+  <node name="web_video_server"
+        pkg="web_video_server"
+        type="web_video_server"
+        output="screen"
+        respawn="false">
+    <param name="port" value="9093"/>
+    <param name="address" value="localhost"/>
+    <param name="server_threads" value="4"/>
+  </node>
+
+  <!-- Start our custom ros_web_bridge node -->
+  <node name="ros_web_bridge_node"
+        pkg="ros_web_bridge"
+        type="ros_web_bridge_node"
+        output="screen"
+        respawn="false">
+
+    <!-- Bag file path parameter -->
+    <param name="bag_path" value="/home/robot/data/calib/lidar_vision_ip2/lvdata_2026-05-11-15-54-05.bag"/>
+  </node>
+
+</launch>
