@@ -78,6 +78,9 @@ void BagPlayer::PlaybackThread() {
       ROS_INFO("[BagPlayer] Bag duration: %.1f seconds",
                (bag_end_time - bag_start_time).toSec());
 
+      // Wall-clock start for rate-controlled playback
+      ros::Time playback_start = ros::Time::now();
+
       // Playback loop
       for (const rosbag::MessageInstance& m : view) {
         // Check if we should stop
@@ -102,8 +105,14 @@ void BagPlayer::PlaybackThread() {
           }
         }
 
-        // Small sleep to prevent overwhelming the system
-        ros::Duration(0.001).sleep();
+        // Honor original message timing: sleep until the next message's
+        // wall-clock time matches its offset from the bag start.
+        ros::Duration elapsed = m.getTime() - bag_start_time;
+        ros::Time target_time = playback_start + elapsed;
+        ros::Time now = ros::Time::now();
+        if (target_time > now) {
+          (target_time - now).sleep();
+        }
       }
 
       // Close bag
