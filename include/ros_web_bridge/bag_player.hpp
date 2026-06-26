@@ -6,6 +6,7 @@
 #include <rosbag/view.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <atomic>
 #include <memory>
 #include <string>
@@ -55,6 +56,7 @@ class BagPlayer {
   std::string bag_path_;
   ros::Publisher image_pub_;
   ros::Publisher camera_info_pub_;
+  ros::Publisher lidar_pub_;
   std::thread playback_thread_;
   std::atomic<bool> is_running_{false};
 };

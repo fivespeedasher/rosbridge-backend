@@ -4,6 +4,7 @@
 #include <rosbag/view.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <ros/console.h>
 
 namespace ros_web_bridge {
@@ -14,6 +15,8 @@ BagPlayer::BagPlayer(const ros::NodeHandle& nh, const std::string& bag_path)
   image_pub_ = nh_.advertise<sensor_msgs::Image>("/camera/color/image_raw", 10);
   // Create publisher for camera info
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("/camera/color/camera_info", 10);
+  // Create publisher for LiDAR point cloud
+  lidar_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/livox/lidar", 10);
 }
 
 BagPlayer::~BagPlayer() {
@@ -102,6 +105,14 @@ void BagPlayer::PlaybackThread() {
           if (camera_info_msg) {
             // Publish with original timestamp
             camera_info_pub_.publish(camera_info_msg);
+          }
+        }
+        // Forward LiDAR point cloud messages
+        else if (m.getTopic() == "/livox/lidar") {
+          sensor_msgs::PointCloud2::ConstPtr lidar_msg = m.instantiate<sensor_msgs::PointCloud2>();
+          if (lidar_msg) {
+            // Publish with original timestamp
+            lidar_pub_.publish(lidar_msg);
           }
         }
 

@@ -1,7 +1,8 @@
 <launch>
   <!--
     Launch file for ros_web_bridge package
-    Starts rosbridge_server WebSocket server, web_video_server, and the bag playback node
+    Starts rosbridge_server WebSocket server, web_video_server, bag playback node,
+    and the lidar filter node (downsample /livox/lidar → /livox/filtered).
   -->
 
   <!-- Start rosbridge_server WebSocket server -->
@@ -29,8 +30,9 @@
         output="screen"
         respawn="false">
     <param name="port" value="9093"/>
-    <param name="address" value="localhost"/>
+    <param name="address" value="0.0.0.0"/>
     <param name="server_threads" value="4"/>
+    <param name="default_stream_type" value="h264"/>
   </node>
 
   <!-- Start our custom ros_web_bridge node -->
@@ -43,5 +45,19 @@
     <!-- Bag file path parameter -->
     <param name="bag_path" value="/home/robot/data/calib/lidar_vision_ip2/lvdata_2026-05-11-15-54-05.bag"/>
   </node>
+
+  <!--
+    Lidar filter node: downsamples /livox/lidar → /livox/filtered
+    (VoxelGrid, RANSAC ground removal, x>0 filter).
+    Uses the same bag topic (/livox/lidar) that the bag player publishes.
+    Pure variant — no detections dependency.
+  -->
+  <include file="$(find lidar_camera_projection)/launch/lidar_filter_pure.launch">
+    <arg name="input_topic" value="/livox/lidar"/>
+    <arg name="output_topic" value="/livox/filtered"/>
+    <arg name="voxel_leaf_size" value="0.5"/>
+    <arg name="ransac_distance_threshold" value="0.01"/>
+    <arg name="ransac_max_iterations" value="50"/>
+  </include>
 
 </launch>
