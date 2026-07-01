@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  std_srvs
   message_generation
 )
 
@@ -108,7 +109,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS cv_bridge image_transport rosbag roscpp sensor_msgs std_msgs message_runtime
+  CATKIN_DEPENDS cv_bridge image_transport rosbag roscpp sensor_msgs std_msgs std_srvs message_runtime
   DEPENDS system_lib
 )
 

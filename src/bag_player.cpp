@@ -15,7 +15,7 @@ BagPlayer::BagPlayer(const ros::NodeHandle& nh, const std::string& bag_path)
   image_pub_ = nh_.advertise<sensor_msgs::Image>("/camera/color/image_raw", 10);
   // Create publisher for camera info
   camera_info_pub_ = nh_.advertise<sensor_msgs::CameraInfo>("/camera/color/camera_info", 10);
-  // Create publisher for LiDAR point cloud
+  // LiDAR point cloud — published for backend filtering (not streamed to web)
   lidar_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("/livox/lidar", 10);
 }
 
@@ -107,11 +107,10 @@ void BagPlayer::PlaybackThread() {
             camera_info_pub_.publish(camera_info_msg);
           }
         }
-        // Forward LiDAR point cloud messages
+        // Forward LiDAR point cloud for backend filtering
         else if (m.getTopic() == "/livox/lidar") {
           sensor_msgs::PointCloud2::ConstPtr lidar_msg = m.instantiate<sensor_msgs::PointCloud2>();
           if (lidar_msg) {
-            // Publish with original timestamp
             lidar_pub_.publish(lidar_msg);
           }
         }

@@ -1,0 +1,11 @@
+<launch>
+  <!--
+    Wraps lidar_camera_projection/lidar_camera_transform.launch for on-demand launch
+    by ros_web_bridge_node. Runs camera_frame_node: projects /livox/filtered into
+    camera frame and publishes /livox/inbox_voxel (detection points).
+  -->
+  <include file="$(find lidar_camera_projection)/launch/lidar_camera_transform.launch">
+    <arg name="input_topic" value="/livox/filtered"/>
+    <arg name="output_topic" value="/camera/frame/points"/>
+  </include>
+</launch>

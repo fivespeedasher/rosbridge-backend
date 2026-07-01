@@ -2,7 +2,7 @@
   <!--
     Launch file for ros_web_bridge package
     Starts rosbridge_server WebSocket server, web_video_server, bag playback node,
-    and the lidar filter node (downsample /livox/lidar → /livox/filtered).
+    lidar filter node, and camera-frame detection node.
   -->
 
   <!-- Start rosbridge_server WebSocket server -->
@@ -15,12 +15,9 @@
     <param name="address" value=""/>
     <param name="ssl" value="false"/>
     <param name="authenticate" value="false"/>
-
-    <!-- Optional: Uncomment to restrict topics if needed -->
-    <!--
-    <param name="topic_whitelist" value="['/camera/color/image_raw']"/>
-    <param name="service_whitelist" value="['/ros_web_bridge_node/play_bag']"/>
-    -->
+    <!-- Prevent unbounded buffer growth for large PointCloud2 messages -->
+    <param name="max_message_size" value="10485760"/>  <!-- 10 MB cap -->
+    <param name="fragment_timeout" value="60"/>
   </node>
 
   <!-- Start web_video_server for MJPEG image streaming -->
@@ -41,23 +38,21 @@
         type="ros_web_bridge_node"
         output="screen"
         respawn="false">
-
-    <!-- Bag file path parameter -->
     <param name="bag_path" value="/home/robot/data/calib/lidar_vision_ip2/lvdata_2026-05-11-15-54-05.bag"/>
   </node>
 
   <!--
-    Lidar filter node: downsamples /livox/lidar → /livox/filtered
-    (VoxelGrid, RANSAC ground removal, x>0 filter).
-    Uses the same bag topic (/livox/lidar) that the bag player publishes.
-    Pure variant — no detections dependency.
+    Lidar filter: /livox/lidar -> /livox/filtered
+    (VoxelGrid, RANSAC ground removal, x>0 filter, detections loading).
+    The frontend subscribes/unsubscribes to /livox/filtered via the checkbox.
   -->
-  <include file="$(find lidar_camera_projection)/launch/lidar_filter_pure.launch">
-    <arg name="input_topic" value="/livox/lidar"/>
-    <arg name="output_topic" value="/livox/filtered"/>
-    <arg name="voxel_leaf_size" value="0.5"/>
-    <arg name="ransac_distance_threshold" value="0.01"/>
-    <arg name="ransac_max_iterations" value="50"/>
-  </include>
+  <include file="$(find ros_web_bridge)/launch/filter.launch"/>
+
+  <!--
+    Camera-frame detection: /livox/filtered -> /livox/inbox_voxel + /camera/frame/points
+    Projects to pixel coords, queries detection bboxes, extracts clusters.
+    The frontend subscribes/unsubscribes to /livox/inbox_voxel via the checkbox.
+  -->
+  <include file="$(find ros_web_bridge)/launch/detection.launch"/>
 
 </launch>

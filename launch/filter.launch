@@ -1,0 +1,13 @@
+<launch>
+  <!--
+    Wraps lidar_camera_projection/lidar_filter.launch for on-demand launch
+    by ros_web_bridge_node. Runs lidar_filter_node: filters /livox/lidar → /livox/filtered.
+  -->
+  <include file="$(find lidar_camera_projection)/launch/lidar_filter.launch">
+    <arg name="input_topic" value="/livox/lidar"/>
+    <arg name="output_topic" value="/livox/filtered"/>
+    <arg name="voxel_leaf_size" value="0.4"/>
+    <arg name="ransac_distance_threshold" value="0.03"/>
+    <arg name="ransac_max_iterations" value="10"/>
+  </include>
+</launch>

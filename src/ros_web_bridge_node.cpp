@@ -2,6 +2,8 @@
 #include <ros_web_bridge/PlayBag.h>
 #include "ros_web_bridge/bag_player.hpp"
 
+#include <string>
+
 class RosWebBridgeNode {
  public:
   RosWebBridgeNode()
@@ -14,9 +16,9 @@ class RosWebBridgeNode {
     bag_player_.reset(new ros_web_bridge::BagPlayer(nh_private_, bag_path_));
 
     // Advertise the PlayBag service
-    srv_ = nh_private_.advertiseService("play_bag",
-                                        &RosWebBridgeNode::SrvCallback,
-                                        this);
+    play_bag_srv_ = nh_private_.advertiseService("play_bag",
+                                                  &RosWebBridgeNode::PlayBagCallback,
+                                                  this);
 
     ROS_INFO("[RosWebBridge] Node initialized");
     ROS_INFO("[RosWebBridge] Bag path: %s", bag_path_.c_str());
@@ -27,12 +29,9 @@ class RosWebBridgeNode {
  private:
   /**
    * @brief Service callback for starting/stopping bag playback
-   * @param req Service request (start = true to start, false to stop)
-   * @param resp Service response (success = operation result)
-   * @return true if service call was handled
    */
-  bool SrvCallback(ros_web_bridge::PlayBag::Request& req,
-                   ros_web_bridge::PlayBag::Response& resp) {
+  bool PlayBagCallback(ros_web_bridge::PlayBag::Request& req,
+                       ros_web_bridge::PlayBag::Response& resp) {
     if (req.start) {
       resp.success = bag_player_->Start();
       ROS_INFO("[RosWebBridge] Service: start playback -> %s",
@@ -48,18 +47,12 @@ class RosWebBridgeNode {
   ros::NodeHandle nh_private_;
   std::string bag_path_;
   std::unique_ptr<ros_web_bridge::BagPlayer> bag_player_;
-  ros::ServiceServer srv_;
+  ros::ServiceServer play_bag_srv_;
 };
 
 int main(int argc, char** argv) {
-  // Initialize ROS node
   ros::init(argc, argv, "ros_web_bridge_node");
-
-  // Create node instance
   RosWebBridgeNode node;
-
-  // Spin to handle service calls
   ros::spin();
-
   return 0;
 }
